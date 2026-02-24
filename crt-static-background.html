@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slow-Motion CRT Static Background</title>
+  <style>
+    /* Make the demo fill the viewport with no scroll bars. */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    /* Main visual layer for the animated static. */
+    #crtStatic {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: -1;
+      image-rendering: pixelated; /* preserve chunky CRT-like pixels */
+    }
+
+    /* Optional content so you can see this as a background in action. */
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      color: #d8d8d8;
+      text-align: center;
+      text-shadow: 0 1px 0 #000;
+      letter-spacing: 0.04em;
+    }
+
+    .panel {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px;
+      backdrop-filter: blur(1px);
+      max-width: 38rem;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="crtStatic" aria-hidden="true"></canvas>
+
+  <main class="content">
+    <section class="panel">
+      <h1>CRT TV Static Background</h1>
+      <p>Procedural greyscale noise at slow-motion speed (~15 FPS).</p>
+    </section>
+  </main>
+
+  <script>
+    /**
+     * Slow-motion CRT static background
+     * ---------------------------------
+     * - Procedural random grayscale values every update.
+     * - Frame updates are throttled to ~15 FPS while requestAnimationFrame
+     *   still runs at display refresh rate.
+     * - Each rendered frame uses a random global alpha in [0.15, 0.25]
+     *   to create subtle, analog-style flicker.
+     * - Uses a low-resolution offscreen buffer scaled up for performance
+     *   and chunky 1990s CRT texture.
+     */
+
+    // ---- 1) Setup visible canvas and contexts ----
+    const canvas = document.getElementById('crtStatic');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    // Offscreen canvas: we generate noise at lower resolution for speed.
+    const noiseCanvas = document.createElement('canvas');
+    const noiseCtx = noiseCanvas.getContext('2d', { alpha: false });
+
+    // Disable smoothing so scaled pixels stay sharp/blocky.
+    ctx.imageSmoothingEnabled = false;
+    noiseCtx.imageSmoothingEnabled = false;
+
+    // ---- 2) Rendering configuration ----
+    const TARGET_FPS = 15;                    // slow-motion update rate
+    const FRAME_INTERVAL = 1000 / TARGET_FPS; // ~66.67 ms per noise frame
+    const NOISE_SCALE = 3;                    // larger value => fewer generated pixels
+
+    let lastUpdateTime = 0;
+    let imageData;
+    let pixelBuffer;
+
+    // ---- 3) Resize handler ----
+    function resize() {
+      // Keep canvas crisp on high-DPI screens.
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      const width = Math.floor(window.innerWidth * dpr);
+      const height = Math.floor(window.innerHeight * dpr);
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Build smaller noise buffer and scale up when drawing.
+      noiseCanvas.width = Math.max(1, Math.floor(width / NOISE_SCALE));
+      noiseCanvas.height = Math.max(1, Math.floor(height / NOISE_SCALE));
+
+      imageData = noiseCtx.createImageData(noiseCanvas.width, noiseCanvas.height);
+      pixelBuffer = imageData.data;
+    }
+
+    window.addEventListener('resize', resize, { passive: true });
+    resize();
+
+    // ---- 4) Generate one full frame of random grayscale noise ----
+    function generateNoiseFrame() {
+      // Every pixel is updated each frame with a random grayscale value.
+      // RGBA layout: [R, G, B, A]
+      for (let i = 0; i < pixelBuffer.length; i += 4) {
+        const gray = (Math.random() * 255) | 0;
+        pixelBuffer[i] = gray;     // R
+        pixelBuffer[i + 1] = gray; // G
+        pixelBuffer[i + 2] = gray; // B
+        pixelBuffer[i + 3] = 255;  // fully opaque in source buffer
+      }
+      noiseCtx.putImageData(imageData, 0, 0);
+    }
+
+    // ---- 5) Draw helper: static + subtle scanlines ----
+    function drawToScreen() {
+      // Clear to black each frame.
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Required flicker alpha: 15-25% opacity per frame.
+      ctx.globalAlpha = 0.15 + Math.random() * 0.10;
+      ctx.drawImage(noiseCanvas, 0, 0, canvas.width, canvas.height);
+
+      // Optional CRT-inspired horizontal scanline shading (grayscale only).
+      ctx.globalAlpha = 0.10;
+      ctx.fillStyle = '#000';
+      for (let y = 0; y < canvas.height; y += 4) {
+        ctx.fillRect(0, y, canvas.width, 1);
+      }
+    }
+
+    // ---- 6) Animation loop using requestAnimationFrame + frame throttling ----
+    function animate(now) {
+      // Advance noise only when enough time has elapsed for ~15 FPS.
+      if (now - lastUpdateTime >= FRAME_INTERVAL) {
+        // Keep timing stable even when frames drift.
+        lastUpdateTime = now - ((now - lastUpdateTime) % FRAME_INTERVAL);
+
+        generateNoiseFrame();
+        drawToScreen();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame((t) => {
+      lastUpdateTime = t;
+      animate(t);
+    });
+  </script>
+</body>
+</html>
