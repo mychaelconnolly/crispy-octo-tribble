@@ -1,21 +1,8 @@
 :root {
   color-scheme: dark;
-  --surface-bg: #120f0c;
-  --glyph-head: #e0d4c1;
-  --glyph-tail: #36312b;
+  --surface-bg: #090807;
+  --surface-fg: #d8d1c7;
   background: var(--surface-bg);
-}
-
-@font-face {
-  font-family: "Glyph Noto Math";
-  src: url("./fonts/NotoSansMath-subset.woff2") format("woff2");
-  font-display: block;
-}
-
-@font-face {
-  font-family: "Glyph Noto Symbols 2";
-  src: url("./fonts/NotoSansSymbols2-subset.woff2") format("woff2");
-  font-display: block;
 }
 
 * {
@@ -31,9 +18,24 @@ body {
   background: var(--surface-bg);
 }
 
-#glyph-rain {
+#canvas {
   display: block;
   width: 100vw;
   height: 100vh;
   background: var(--surface-bg);
+  cursor: crosshair;
+}
+
+#fallback {
+  position: fixed;
+  inset: auto 1.25rem 1.25rem 1.25rem;
+  z-index: 2;
+  margin: 0;
+  color: var(--surface-fg);
+  font: 500 0.875rem/1.45 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+body.is-fallback #canvas {
+  opacity: 0.18;
 }

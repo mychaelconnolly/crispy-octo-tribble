@@ -2,6 +2,49 @@
 
 This static site includes small generated/runtime pieces from third-party open-source or public data sources.
 
+## Flux
+
+Files:
+
+- `vendor/flux/`
+- `public/flux/` after build
+
+Source:
+
+- Flux by Sander Melnikov
+- https://github.com/sandydoo/flux
+- Vendored from upstream commit `fee75d136a5c30dc4321cdf0c5226c9a6d4f5673`
+
+License:
+
+- MIT License
+
+Notice:
+
+```text
+MIT License
+
+Copyright (c) 2021 Sander Melnikov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Pretext
 
 Files:

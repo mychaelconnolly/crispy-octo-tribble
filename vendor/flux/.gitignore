@@ -1,0 +1,11 @@
+/drafts
+mutagen.*
+
+# Rust
+/target
+
+# Release
+/result*
+
+# Dev shell
+/.direnv

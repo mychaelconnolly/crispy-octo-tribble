@@ -1,0 +1,9 @@
+{
+  "name": "michaelconnolly-tech",
+  "private": true,
+  "scripts": {
+    "install:flux": "pnpm --dir vendor/flux/web install --frozen-lockfile",
+    "build": "pnpm --dir vendor/flux/web build && node scripts/sync-flux-dist.mjs",
+    "serve": "python3 -m http.server 4173"
+  }
+}

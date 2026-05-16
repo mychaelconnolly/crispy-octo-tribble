@@ -3,25 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="michaelconnolly.tech" />
+    <meta
+      name="description"
+      content="A fullscreen Flux canvas for michaelconnolly.tech."
+    />
     <meta name="referrer" content="no-referrer" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
     />
     <title>michaelconnolly.tech</title>
     <link rel="icon" href="./favicon.png" type="image/png" />
     <link rel="stylesheet" href="./public/styles.css" />
-    <script type="importmap">
-      {
-        "imports": {
-          "@chenglou/pretext": "./public/vendor/pretext/layout.js"
-        }
-      }
-    </script>
   </head>
   <body>
-    <canvas id="glyph-rain" aria-label="Animated Unicode glyph rain"></canvas>
-    <script type="module" src="./public/main.js"></script>
+    <canvas id="canvas" aria-label="Animated Flux color field"></canvas>
+    <p id="fallback" hidden>
+      This browser cannot run the Flux WebGPU/WebGL canvas.
+    </p>
+    <script src="./public/flux/index.js" defer></script>
   </body>
 </html>

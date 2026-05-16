@@ -1,4 +1,9 @@
 .DS_Store
 node_modules/
+.pnpm-store/
 .cache/
 _private/
+/vendor/flux/target/
+/vendor/flux/web/dist/
+/vendor/flux/web/flux/
+/vendor/flux/web/flux-gl/
