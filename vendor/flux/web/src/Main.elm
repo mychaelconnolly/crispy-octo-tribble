@@ -110,7 +110,7 @@ defaultSettings =
     , pressureMode = ClearWith 0.0
     , diffusionIterations = 3
     , pressureIterations = 19
-    , colorMode = Preset Original
+    , colorMode = ImageFile "colors/silver.png"
     , lineLength = 450.0
     , lineWidth = 9.0
     , lineBeginOffset = 0.4
@@ -346,34 +346,6 @@ view model =
             [ Html.div
                 [ HA.class "control-container" ]
                 [ viewSettings model.settings ]
-            ]
-        , Html.footer []
-            [ Html.ul [ HA.class "nav" ]
-                [ Html.li []
-                    [ Html.button
-                        [ Event.onClick ToggleControls
-                        , HA.type_ "button"
-                        , HA.class (classNameWhen "active" model.isOpen)
-                        , HA.class "whitespace-nowrap"
-                        ]
-                        [ Html.text "🄲 Controls" ]
-                    ]
-                , Html.li []
-                    [ Html.a
-                        [ HA.href "https://github.com/sandydoo/" ]
-                        [ Html.text "© 2022 Sander Melnikov" ]
-                    ]
-                , Html.li []
-                    [ Html.a
-                        [ HA.href "https://x.com/sandydoo/" ]
-                        [ Html.text "Follow me on X" ]
-                    ]
-                , Html.li []
-                    [ Html.a
-                        [ HA.href "https://sandydoo.gumroad.com/l/flux" ]
-                        [ Html.text "Buy this screensaver" ]
-                    ]
-                ]
             ]
         ]
 

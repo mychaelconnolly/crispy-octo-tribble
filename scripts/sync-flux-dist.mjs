@@ -1,10 +1,19 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { cp, readdir, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const repoRoot = resolve(import.meta.dirname, "..");
 const from = resolve(repoRoot, "vendor/flux/web/dist");
-const to = resolve(repoRoot, "public/flux");
+const rootGenerated = ["index.html", "index.js", "colors", "fonts"];
+const existingRootFiles = await readdir(repoRoot);
+const staleWasm = existingRootFiles.filter((entry) => entry.endsWith(".module.wasm"));
 
-await rm(to, { recursive: true, force: true });
-await mkdir(to, { recursive: true });
-await cp(from, to, { recursive: true });
+await Promise.all(
+  [...rootGenerated, ...staleWasm].map((entry) =>
+    rm(resolve(repoRoot, entry), { recursive: true, force: true }),
+  ),
+);
+
+for (const entry of await readdir(from)) {
+  if (entry === "CNAME") continue;
+  await cp(resolve(from, entry), resolve(repoRoot, entry), { recursive: true });
+}
