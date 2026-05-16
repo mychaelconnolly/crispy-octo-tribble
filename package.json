@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "install:flux": "pnpm --dir vendor/flux/web install --frozen-lockfile",
-    "build": "pnpm --dir vendor/flux/web build && node scripts/sync-flux-dist.mjs",
+    "build": "PATH=/opt/homebrew/opt/rustup/bin:/opt/homebrew/opt/rustup/libexec/bin:/opt/homebrew/bin:$PATH pnpm --dir vendor/flux/web exec webpack --mode production --env ELM_BIN=./node_modules/.pnpm/elm@0.19.1-6/node_modules/elm/bin/elm && node scripts/sync-flux-dist.mjs",
     "serve": "python3 -m http.server 4173"
   }
 }

@@ -2,6 +2,7 @@
 node_modules/
 .pnpm-store/
 .cache/
+.agent-continuity/
 _private/
 /vendor/flux/target/
 /vendor/flux/web/dist/
