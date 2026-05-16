@@ -3,6 +3,10 @@ import { Flux } from "../flux";
 
 const canvas = document.getElementById("canvas");
 const fallback = document.getElementById("fallback");
+const scriptUrl = new URL(
+  document.currentScript?.src || "./public/flux/index.js",
+  window.location.href,
+);
 
 let flux;
 let settings = defaultSettings();
@@ -63,27 +67,25 @@ async function createFlux() {
   }
 
   try {
-    if (navigator.gpu) {
-      flux = await new Flux(settings);
-    } else {
-      flux = new FluxGL(settings);
-    }
+    flux = new FluxGL(settings);
   } catch (error) {
-    if (navigator.gpu) {
-      try {
-        flux = new FluxGL(settings);
-      } catch (fallbackError) {
-        console.error(error);
-        console.error(fallbackError);
-        showFallback("This browser cannot run the Flux WebGPU/WebGL canvas.");
-        return;
-      }
-    } else {
+    if (!navigator.gpu) {
       console.error(error);
       showFallback("This browser cannot run the Flux WebGPU/WebGL canvas.");
       return;
     }
+
+    try {
+      flux = await new Flux(settings);
+    } catch (fallbackError) {
+      console.error(error);
+      console.error(fallbackError);
+      showFallback("This browser cannot run the Flux WebGPU/WebGL canvas.");
+      return;
+    }
   }
+
+  await applyImagePalette("colors/silver.png");
 
   const resizeObserver = new ResizeObserver(([entry]) => {
     const { width, height } = entry.contentRect;
@@ -97,6 +99,26 @@ async function createFlux() {
   };
 
   window.requestAnimationFrame(animate);
+}
+
+function assetUrl(path) {
+  return new URL(path, scriptUrl).toString();
+}
+
+async function loadImage(imageUrl) {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return createImageBitmap(blob, { resizeWidth: 500, resizeHeight: 500 });
+}
+
+async function applyImagePalette(path) {
+  const bitmap = await loadImage(assetUrl(path));
+  flux.save_image(bitmap);
+  settings = {
+    ...settings,
+    colorMode: { ImageFile: path },
+  };
+  flux.settings = settings;
 }
 
 function nextSeed() {
@@ -144,6 +166,18 @@ function rgbCss([r, g, b]) {
   return `rgb(${r} ${g} ${b})`;
 }
 
+function rgbVar([r, g, b]) {
+  return `${r} ${g} ${b}`;
+}
+
+function applyCssPalette(colors) {
+  const root = document.documentElement;
+  root.style.setProperty("--flux-a", rgbVar(colors[0]));
+  root.style.setProperty("--flux-b", rgbVar(colors[1]));
+  root.style.setProperty("--flux-c", rgbVar(colors[2]));
+  root.style.setProperty("--flux-d", rgbVar(colors[3]));
+}
+
 async function createPaletteBitmap() {
   const size = 500;
   const paletteCanvas =
@@ -166,6 +200,9 @@ async function createPaletteBitmap() {
     { x: 1.0, lightness: randomBetween(0.74, 0.9), chroma: randomBetween(0.03, 0.1), hue: baseHue + 300 },
   ];
 
+  const colors = stops.map((stop) =>
+    oklchToRgb(stop.lightness, stop.chroma, ((stop.hue % 360) + 360) % 360),
+  );
   const gradient = context.createLinearGradient(0, 0, size, size);
   for (const stop of stops) {
     gradient.addColorStop(
@@ -199,9 +236,15 @@ async function createPaletteBitmap() {
   context.globalAlpha = 1;
   context.globalCompositeOperation = "source-over";
   if ("transferToImageBitmap" in paletteCanvas) {
-    return paletteCanvas.transferToImageBitmap();
+    return {
+      bitmap: paletteCanvas.transferToImageBitmap(),
+      colors: [colors[1], colors[3], colors[4], colors[2]],
+    };
   }
-  return createImageBitmap(paletteCanvas);
+  return {
+    bitmap: await createImageBitmap(paletteCanvas),
+    colors: [colors[1], colors[3], colors[4], colors[2]],
+  };
 }
 
 async function randomizePalette() {
@@ -209,7 +252,8 @@ async function randomizePalette() {
   randomizing = true;
 
   try {
-    const bitmap = await createPaletteBitmap();
+    const { bitmap, colors } = await createPaletteBitmap();
+    applyCssPalette(colors);
     flux.save_image(bitmap);
     settings = {
       ...settings,
@@ -241,7 +285,13 @@ function bindInteraction() {
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+function start() {
   bindInteraction();
   createFlux();
-});
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", start, { once: true });
+} else {
+  start();
+}
